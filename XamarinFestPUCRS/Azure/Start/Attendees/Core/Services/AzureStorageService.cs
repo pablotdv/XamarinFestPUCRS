@@ -19,19 +19,33 @@ namespace Core.Services
 			ImageContainer = client.GetContainerReference("images");
 		}
 
-		public async Task UploadFile(Stream stream, string name)
-		{
-			
-		}
+        public async Task UploadFile(Stream stream, string name)
+        {
+            await ImageContainer.CreateIfNotExistsAsync();
+            var blob = ImageContainer.GetBlockBlobReference(name);
+            await blob.UploadFromStreamAsync(stream);
+        }
 
-		public async Task<byte[]> DownloadFile(string name)
-		{
-			return new byte[0];
-		}
+        public async Task<byte[]> DownloadFile(string name)
+        {
+            await ImageContainer.CreateIfNotExistsAsync();
+            var blob = ImageContainer.GetBlobReference(name);
+            if (await blob.ExistsAsync())
+            {
+                await blob.FetchAttributesAsync();
+                byte[] bytes = new byte[blob.Properties.Length];
+                await blob.DownloadToByteArrayAsync(bytes, 0);
+                return bytes;
+            }
 
-		public async Task<bool> DeleteFile(string name)
-		{
-			return false;
-		}
-	}
+            return null;
+        }
+
+        public async Task<bool> DeleteFile(string name)
+        {
+            await ImageContainer.CreateIfNotExistsAsync();
+            var blob = ImageContainer.GetBlobReference(name);
+            return await blob.DeleteIfExistsAsync();
+        }
+    }
 }

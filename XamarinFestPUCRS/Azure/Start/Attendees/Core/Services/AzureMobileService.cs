@@ -34,31 +34,43 @@ namespace Core.Services
 			_attendee = _client.GetSyncTable<AttendeeModel>();
 		}
 
-		private async Task SyncAttendees()
-		{
-			try
-			{
-				
-			}
-			catch (Exception e)
-			{
-				LogHelper.Instance.AddLog(e);
-			}
-		}
+        private async Task SyncAttendees()
+        {
+            try
+            {
+                await _client.SyncContext.PushAsync();
+                await _attendee.PullAsync("attendees", _attendee.CreateQuery());
+            }
+            catch (Exception e)
+            {
+                LogHelper.Instance.AddLog(e);
+            }
+        }
 
-		public async Task<IList<AttendeeModel>> GetAttendees()
-		{
-			return new List<AttendeeModel>();
-		}
+        public async Task<IList<AttendeeModel>> GetAttendees()
+        {
+            await Initialize();
+            await SyncAttendees();
+            return await _attendee.OrderBy(a => a.Name).ToListAsync();
+        }
 
-		public async Task SaveAttendee(AttendeeModel attendeeModel)
-		{
-			
-		}
+        public async Task SaveAttendee(AttendeeModel attendeeModel)
+        {
+            await Initialize();
 
-		public async Task DeleteAttendee(AttendeeModel attendeeModel)
-		{
-			
-		}
-	}
+            if (string.IsNullOrEmpty(attendeeModel.Id))
+                await _attendee.InsertAsync(attendeeModel);
+            else
+                await _attendee.UpdateAsync(attendeeModel);
+
+            await SyncAttendees();
+        }
+
+        public async Task DeleteAttendee(AttendeeModel attendeeModel)
+        {
+            await Initialize();
+            await _attendee.DeleteAsync(attendeeModel);
+            await SyncAttendees();
+        }
+    }
 }

@@ -9,6 +9,8 @@ namespace Core.Views
 		public DetailsView(AttendeeModel attendeeModel)
 		{
 			InitializeComponent();
-		}
+
+            BindingContext = new DetailsViewModel(attendeeModel);
+        }
 	}
 }
