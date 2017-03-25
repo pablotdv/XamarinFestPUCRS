@@ -12,13 +12,23 @@
     <StackLayout>
       <Button Text="Sync Attendees" Command="{Binding GetAttendeesCommand}"/>
       <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}"/>
-      <ListView ItemsSource="{Binding Attendees}"
-                ItemTapped="OnItemTapped">
+      <ListView ItemsSource="{Binding Attendees}">
         <ListView.ItemTemplate>
           <DataTemplate>
-            <TextCell
+            <ViewCell>
+              <ViewCell.ContextActions>
+                <MenuItem Clicked="OnMore" CommandParameter="{Binding Name}"
+                   Text="More" />
+                <MenuItem Clicked="OnDelete" CommandParameter="{Binding Name}"
+                   Text="Delete" IsDestructive="True" />
+              </ViewCell.ContextActions>
+              <StackLayout Padding="15,0">
+                <Label Text="{Binding Name}" />
+              </StackLayout>
+            </ViewCell>
+            <!--<TextCell
                 Text="{Binding Name}"
-                Detail="{Binding Email}" />
+                Detail="{Binding Email}" />-->
           </DataTemplate>
         </ListView.ItemTemplate>
       </ListView>
